@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AXION Holding Group — Building the Future of Global Trade, Technology & Infrastructure">
+<meta name="theme-color" content="#0A0A0A">
+<title>AXION Holding Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ===== DESIGN SYSTEM ===== */
+:root {
+  --g100:#FFF8E7;--g200:#FFE999;--g300:#FFD700;--g400:#D4AF37;--g500:#B8860B;--g600:#8B6914;--g700:#6B4F0A;
+  --b100:#1A1A1A;--b200:#141414;--b300:#0F0F0F;--b400:#0A0A0A;--b500:#050505;
+  --glow:0 0 20px rgba(212,175,55,.4),0 0 60px rgba(212,175,55,.15);
+  --glow2:0 0 40px rgba(255,215,0,.6),0 0 100px rgba(212,175,55,.3);
+  --cbg:rgba(212,175,55,.04);--cb:rgba(212,175,55,.2);--cbh:rgba(212,175,55,.6);
+  --fd:'Cinzel',serif;--fb:'Cormorant Garamond',serif;--ft:'Orbitron',monospace;--fu:'Rajdhani',sans-serif;
+  --nh:80px;--tr:all .4s cubic-bezier(.25,.46,.45,.94);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--b400);color:#fff;font-family:var(--fb);overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+.cur{position:fixed;width:12px;height:12px;background:var(--g300);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .3s,height .3s;mix-blend-mode:difference}
+.cur-ring{position:fixed;width:40px;height:40px;border:1px solid rgba(212,175,55,.6);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:all .15s ease-out}
+.cur.h{width:20px;height:20px}.cur-ring.h{width:60px;height:60px;border-color:var(--g300)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--b400)}::-webkit-scrollbar-thumb{background:var(--g500)}
+
+/* GLOBAL CANVAS */
+#gc{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* LOADING */
+#loading{position:fixed;inset:0;z-index:9999;background:var(--b500);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.l-logo{font-family:var(--ft);font-size:22px;letter-spacing:8px;font-weight:700;background:linear-gradient(135deg,var(--g200),var(--g400));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.l-bar-wrap{width:300px;height:2px;background:rgba(212,175,55,.1);overflow:hidden}
+.l-bar{height:100%;background:linear-gradient(90deg,var(--g500),var(--g300),var(--g500));background-size:200%;animation:lsh 1s infinite;width:0%;transition:width .1s}
+@keyframes lsh{0%{background-position:-200%}100%{background-position:200%}}
+.l-pct{font-family:var(--ft);font-size:10px;letter-spacing:4px;color:var(--g400)}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nh);z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 60px;transition:var(--tr)}
+.nav.sc{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(212,175,55,.12);backdrop-filter:blur(20px)}
+.nlogo{display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer}
+.nlogo svg{width:44px;height:44px}
+.nlt{font-family:var(--ft);font-size:17px;font-weight:700;letter-spacing:4px;background:linear-gradient(135deg,var(--g300),var(--g400),var(--g600));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nls{font-family:var(--fu);font-size:9px;font-weight:300;letter-spacing:3px;color:rgba(212,175,55,.5);display:block;margin-top:-2px}
+.nlinks{display:flex;align-items:center;gap:38px;list-style:none}
+.nlinks a{font-family:var(--fu);font-size:11px;font-weight:500;letter-spacing:2px;color:rgba(255,255,255,.65);text-decoration:none;text-transform:uppercase;position:relative;transition:var(--tr)}
+.nlinks a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--g300);transition:width .3s}
+.nlinks a:hover{color:var(--g300)}.nlinks a:hover::after{width:100%}
+.ncta{border:1px solid var(--g400)!important;color:var(--g300)!important;padding:10px 22px!important;font-size:10px!important}
+.ncta::after{display:none!important}.ncta:hover{background:var(--g400)!important;color:var(--b400)!important;box-shadow:var(--glow)!important}
+.nhb{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:5px}
+.nhb span{display:block;width:24px;height:1px;background:var(--g400);transition:var(--tr)}
+
+/* HERO */
+#home{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:1}
+.hcont{position:relative;z-index:2;text-align:center;max-width:920px;padding:0 40px}
+.hbadge{display:inline-flex;align-items:center;gap:10px;font-family:var(--ft);font-size:9px;letter-spacing:4px;color:var(--g400);border:1px solid rgba(212,175,55,.3);padding:8px 20px;margin-bottom:40px;position:relative;overflow:hidden}
+.hbadge::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(212,175,55,.1),transparent);animation:bs 3s infinite}
+@keyframes bs{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.hbdot{width:6px;height:6px;border-radius:50%;background:var(--g300);animation:pd 2s infinite}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.htitle{font-family:var(--fd);font-size:clamp(56px,9vw,108px);font-weight:900;line-height:.88;margin-bottom:28px;background:linear-gradient(135deg,var(--g200) 0%,var(--g300) 30%,var(--g400) 60%,var(--g600) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(212,175,55,.25))}
+.htitle span{display:block;font-size:.32em;font-weight:400;letter-spacing:8px;font-family:var(--ft);margin-bottom:8px;background:linear-gradient(90deg,var(--g400),var(--g300),var(--g400));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hsub{font-size:clamp(15px,1.8vw,20px);font-weight:300;line-height:1.8;color:rgba(255,255,255,.72);margin-bottom:18px;font-style:italic}
+.hdesc{font-family:var(--fu);font-size:13px;font-weight:300;letter-spacing:1px;color:rgba(255,255,255,.45);margin-bottom:56px;max-width:680px;margin-left:auto;margin-right:auto;line-height:2}
+.hctas{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.hscroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.hscroll span{font-family:var(--ft);font-size:8px;letter-spacing:3px;color:rgba(212,175,55,.45);text-transform:uppercase}
+.hsl{width:1px;height:56px;background:linear-gradient(to bottom,var(--g400),transparent);animation:sl 2s ease-in-out infinite}
+@keyframes sl{0%,100%{opacity:.3}50%{opacity:1}}
+.hstats{position:absolute;bottom:80px;right:56px;display:flex;flex-direction:column;gap:18px;z-index:2}
+.hstat{text-align:right;font-family:var(--ft)}
+.hstat-n{font-size:26px;font-weight:700;color:var(--g300);display:block;line-height:1}
+.hstat-l{font-size:8px;letter-spacing:2px;color:rgba(212,175,55,.45);display:block;margin-top:2px}
+
+/* BUTTONS */
+.btn-p{font-family:var(--fu);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;text-decoration:none;padding:15px 34px;cursor:pointer;border:none;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--g400),var(--g500));color:var(--b400);clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);transition:var(--tr);display:inline-block}
+.btn-p:hover{box-shadow:var(--glow2);transform:translateY(-2px)}
+.btn-s{font-family:var(--fu);font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;text-decoration:none;padding:14px 33px;cursor:pointer;border:1px solid rgba(212,175,55,.5);color:var(--g300);background:transparent;clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);transition:var(--tr);display:inline-block}
+.btn-s:hover{border-color:var(--g300);box-shadow:var(--glow);transform:translateY(-2px)}
+
+/* SECTION SHARED */
+section{position:relative;z-index:1}
+.sec-pad{padding:120px 0}
+.container{max-width:1400px;margin:0 auto;padding:0 60px}
+.sec-hdr{text-align:center;margin-bottom:80px}
+.sec-tag{font-family:var(--ft);font-size:9px;letter-spacing:4px;color:var(--g400);text-transform:uppercase;margin-bottom:16px;display:block}
+.sec-title{font-family:var(--fd);font-size:clamp(34px,5vw,62px);font-weight:700;line-height:1.1;background:linear-gradient(135deg,var(--g200),var(--g300),var(--g500));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:18px}
+.sec-sub{font-size:17px;font-weight:300;color:rgba(255,255,255,.58);max-width:580px;margin:0 auto;line-height:1.8;font-style:italic}
+.sec-line{width:80px;height:1px;margin:28px auto 0;background:linear-gradient(90deg,transparent,var(--g400),transparent)}
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.25),transparent)}
+.fu{opacity:0;transform:translateY(40px)}
+.fi{opacity:0}
+
+/* ABOUT */
+#about{padding:120px 0;background:linear-gradient(180deg,var(--b400) 0%,var(--b300) 50%,var(--b400) 100%)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.about-vis{position:relative;height:480px}
+#about-canvas{width:100%!important;height:100%!important}
+.about-content .sec-hdr{text-align:left;margin-bottom:36px}
+.about-content .sec-line{margin-left:0}
+.atext{font-size:16px;line-height:1.95;color:rgba(255,255,255,.68);margin-bottom:22px}
+.apillars{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px}
+.apillar{padding:18px;border:1px solid var(--cb);background:var(--cbg);position:relative;transition:var(--tr)}
+.apillar::before{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:linear-gradient(to bottom,var(--g300),transparent);transition:height .4s}
+.apillar:hover{border-color:var(--cbh)}.apillar:hover::before{height:100%}
+.pnum{font-family:var(--ft);font-size:9px;color:var(--g400);letter-spacing:2px;margin-bottom:8px}
+.ptitle{font-family:var(--fu);font-size:13px;font-weight:600;color:#fff;letter-spacing:1px}
+
+/* VISION */
+#vision{padding:120px 0;background:var(--b400)}
+.vtimeline{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:60px}
+.vphase{padding:50px 38px;background:var(--cbg);border:1px solid var(--cb);position:relative;overflow:hidden;transition:var(--tr)}
+.vphase::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,.07) 0%,transparent 60%);opacity:0;transition:opacity .4s}
+.vphase:hover{border-color:var(--cbh)}.vphase:hover::before{opacity:1}
+.vpnum{font-family:var(--ft);font-size:68px;font-weight:900;line-height:1;color:rgba(212,175,55,.05);position:absolute;top:18px;right:28px}
+.vplabel{font-family:var(--ft);font-size:9px;letter-spacing:3px;color:var(--g400);margin-bottom:12px;display:block;text-transform:uppercase}
+.vptitle{font-family:var(--fd);font-size:22px;font-weight:700;color:#fff;margin-bottom:14px}
+.vpdesc{font-family:var(--fu);font-size:13px;color:rgba(255,255,255,.56);line-height:1.85}
+.vgoal{margin-top:80px;padding:60px;border:1px solid rgba(212,175,55,.2);background:linear-gradient(135deg,rgba(212,175,55,.05) 0%,transparent 100%);position:relative;overflow:hidden;text-align:center}
+.vgoal::before,.vgoal::after{content:'';position:absolute;width:200px;height:200px;border:1px solid rgba(212,175,55,.08);border-radius:50%;animation:rr 20s linear infinite}
+.vgoal::before{top:-100px;right:-100px}.vgoal::after{bottom:-100px;left:-100px;animation-direction:reverse}
+@keyframes rr{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.vgyear{font-family:var(--ft);font-size:110px;font-weight:900;line-height:1;background:linear-gradient(135deg,rgba(212,175,55,.08),rgba(212,175,55,.28));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block}
+.vgtitle{font-family:var(--fd);font-size:30px;font-weight:700;background:linear-gradient(135deg,var(--g200),var(--g400));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px}
+.vgdesc{font-size:15px;color:rgba(255,255,255,.56);max-width:580px;margin:0 auto;font-style:italic;line-height:1.9}
+
+/* DIVISIONS */
+#divisions{padding:120px 0;background:linear-gradient(180deg,var(--b400) 0%,var(--b300) 100%)}
+.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:60px}
+.dcard{position:relative;padding:36px 28px;background:var(--cbg);border:1px solid var(--cb);overflow:hidden;cursor:pointer;transition:var(--tr);min-height:270px;display:flex;flex-direction:column}
+.dcard::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,.09) 0%,transparent 70%);opacity:0;transition:opacity .4s}
+.dcard:hover{border-color:var(--cbh);transform:translateY(-4px)}.dcard:hover::before{opacity:1}
+.dcard:hover .darrow{opacity:1;transform:translateX(0)}
+.dnum{font-family:var(--ft);font-size:10px;letter-spacing:3px;color:rgba(212,175,55,.35);margin-bottom:18px;display:block}
+.diwrap{width:60px;height:60px;margin-bottom:18px}
+.dic{width:60px!important;height:60px!important;transition:transform .4s}
+.dcard:hover .dic{transform:scale(1.12) rotate(8deg)}
+.dname{font-family:var(--fd);font-size:17px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.2}
+.dtag{font-family:var(--fu);font-size:11px;color:var(--g400);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.ddesc{font-family:var(--fu);font-size:12px;color:rgba(255,255,255,.5);line-height:1.75;flex:1}
+.darrow{display:flex;align-items:center;gap:8px;font-family:var(--ft);font-size:9px;letter-spacing:2px;color:var(--g400);margin-top:22px;opacity:0;transform:translateX(-10px);transition:var(--tr)}
+.dcard.feat{grid-column:span 2;background:linear-gradient(135deg,rgba(212,175,55,.09) 0%,rgba(212,175,55,.02) 100%)}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;z-index:2000;background:rgba(5,5,5,.96);backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.modal-ov.active{opacity:1;pointer-events:all}
+.modal-box{max-width:880px;width:90%;max-height:90vh;overflow-y:auto;padding:56px;border:1px solid var(--cbh);background:var(--b300);position:relative;transform:scale(.9);transition:transform .4s}
+.modal-ov.active .modal-box{transform:scale(1)}
+.mcls{position:absolute;top:22px;right:22px;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid rgba(212,175,55,.3);color:var(--g300);font-size:16px;transition:var(--tr);background:transparent;font-family:var(--fu)}
+.mcls:hover{background:rgba(212,175,55,.1);border-color:var(--g300)}
+#mc{width:100%;height:240px;margin-bottom:38px}
+.mtag{font-family:var(--ft);font-size:9px;letter-spacing:4px;color:var(--g400);margin-bottom:10px}
+.mtitle{font-family:var(--fd);font-size:38px;font-weight:700;margin-bottom:20px;background:linear-gradient(135deg,var(--g200),var(--g400));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.mbody{font-size:15px;line-height:1.95;color:rgba(255,255,255,.72);margin-bottom:28px}
+.mfeats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px}
+.mfeat{padding:14px;border:1px solid var(--cb);background:var(--cbg);font-family:var(--fu);font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:10px}
+.mfeat::before{content:'◆';color:var(--g400);font-size:8px;flex-shrink:0}
+
+/* CHARTS */
+#charts{padding:120px 0;background:linear-gradient(180deg,var(--b300) 0%,var(--b400) 100%)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;margin-top:60px}
+.ccard{padding:38px;border:1px solid var(--cb);background:var(--cbg)}
+.ctitle{font-family:var(--fu);font-size:11px;letter-spacing:2px;color:var(--g400);text-transform:uppercase;margin-bottom:22px}
+.cwrap{height:200px;position:relative}
+
+/* INVESTOR */
+#investor{padding:120px 0;background:var(--b400)}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:60px}
+.imkts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:38px}
+.mkt{padding:22px;border:1px solid var(--cb);background:var(--cbg);transition:var(--tr)}
+.mkt:hover{border-color:var(--cbh)}
+.mktv{font-family:var(--ft);font-size:22px;font-weight:700;color:var(--g300);display:block;margin-bottom:4px}
+.mktl{font-family:var(--fu);font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.45);text-transform:uppercase}
+.itext{font-size:15px;line-height:1.95;color:rgba(255,255,255,.65);margin-bottom:28px}
+.ictas{display:flex;gap:14px;flex-wrap:wrap}
+
+/* PITCH DECK */
+.pdeck{}
+.pdhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.pdtitle{font-family:var(--ft);font-size:10px;letter-spacing:3px;color:var(--g400)}
+.sctr{font-family:var(--ft);font-size:10px;color:rgba(212,175,55,.45)}
+.pslides{position:relative;overflow:hidden;border:1px solid var(--cb);background:var(--cbg)}
+.pslide{display:none;padding:44px;min-height:340px;position:relative;flex-direction:column;justify-content:center}
+.pslide.active{display:flex}
+.snum{font-family:var(--ft);font-size:76px;font-weight:900;position:absolute;top:-10px;right:26px;color:rgba(212,175,55,.04);line-height:1}
+.stag{font-family:var(--ft);font-size:8px;letter-spacing:4px;color:var(--g500);margin-bottom:10px;text-transform:uppercase}
+.stitle{font-family:var(--fd);font-size:24px;font-weight:700;margin-bottom:22px;background:linear-gradient(135deg,var(--g200),var(--g400));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.scont{font-family:var(--fu);font-size:13px;color:rgba(255,255,255,.65);line-height:1.9}
+.sitems{list-style:none;display:flex;flex-direction:column;gap:10px}
+.sitems li{display:flex;align-items:flex-start;gap:12px;font-family:var(--fu);font-size:13px;color:rgba(255,255,255,.65)}
+.sitems li::before{content:'▸';color:var(--g400);flex-shrink:0;margin-top:2px}
+.snav{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.sbtn{font-family:var(--ft);font-size:9px;letter-spacing:2px;color:var(--g400);background:transparent;border:1px solid rgba(212,175,55,.3);padding:10px 18px;cursor:pointer;transition:var(--tr)}
+.sbtn:hover{border-color:var(--g400);background:rgba(212,175,55,.08)}
+.sdots{display:flex;gap:8px}
+.sdot{width:6px;height:6px;border-radius:50%;background:rgba(212,175,55,.2);cursor:pointer;transition:var(--tr)}
+.sdot.active{background:var(--g400);transform:scale(1.4)}
+
+/* CONTACT */
+#contact{padding:120px 0;background:var(--b400)}
+.cinn{max-width:800px;margin:0 auto;text-align:center}
+.ct{font-family:var(--fd);font-size:clamp(34px,5vw,62px);font-weight:700;margin-bottom:20px;background:linear-gradient(135deg,var(--g200),var(--g300),var(--g500));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.csub{font-size:16px;color:rgba(255,255,255,.55);line-height:1.85;margin-bottom:56px;font-style:italic}
+.cform{display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;margin-bottom:22px}
+.fg{display:flex;flex-direction:column;gap:7px}.fg.full{grid-column:span 2}
+.flabel{font-family:var(--ft);font-size:8px;letter-spacing:3px;color:var(--g400);text-transform:uppercase}
+.finput,.fsel,.fta{background:rgba(212,175,55,.04);border:1px solid rgba(212,175,55,.14);color:#fff;padding:13px 17px;font-family:var(--fu);font-size:13px;outline:none;transition:var(--tr);width:100%}
+.fta{min-height:110px;resize:vertical}.finput:focus,.fsel:focus,.fta:focus{border-color:var(--g400)}
+.finput::placeholder,.fta::placeholder{color:rgba(255,255,255,.22)}.fsel option{background:var(--b300)}
+.fsub{grid-column:span 2;margin-top:6px}
+.bsub{width:100%;padding:17px;font-family:var(--ft);font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--b400);font-weight:700;background:linear-gradient(135deg,var(--g300),var(--g500));border:none;cursor:pointer;transition:var(--tr)}
+.bsub:hover{box-shadow:var(--glow2);transform:translateY(-2px)}
+
+/* FOOTER */
+footer{padding:60px 0 28px;border-top:1px solid rgba(212,175,55,.08);background:var(--b500);position:relative;z-index:1}
+.finn{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:56px;margin-bottom:56px}
+.fdesc{font-family:var(--fu);font-size:12px;color:rgba(255,255,255,.38);line-height:1.85;max-width:280px;margin-top:18px}
+.fct{font-family:var(--ft);font-size:9px;letter-spacing:3px;color:var(--g400);text-transform:uppercase;margin-bottom:22px}
+.flinks{list-style:none;display:flex;flex-direction:column;gap:11px}
+.flinks a{font-family:var(--fu);font-size:12px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s;display:flex;align-items:center;gap:8px}
+.flinks a::before{content:'›';color:var(--g500)}.flinks a:hover{color:var(--g300)}
+.fbot{display:flex;align-items:center;justify-content:space-between;padding-top:28px;border-top:1px solid rgba(212,175,55,.07)}
+.fcopy{font-family:var(--fu);font-size:10px;color:rgba(255,255,255,.28);letter-spacing:1px}
+.flegal{display:flex;gap:22px}
+.flegal a{font-family:var(--fu);font-size:10px;color:rgba(255,255,255,.28);text-decoration:none;transition:color .2s}.flegal a:hover{color:var(--g400)}
+
+/* MOBILE NAV */
+.mnav{display:none;position:fixed;inset:0;z-index:999;background:rgba(5,5,5,.98);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.mnav.open{display:flex}
+.mnav a{font-family:var(--fd);font-size:26px;font-weight:700;color:#fff;text-decoration:none;letter-spacing:2px;transition:color .2s}
+.mnav a:hover{color:var(--g300)}
+.mncls{position:absolute;top:28px;right:28px;font-size:22px;color:var(--g300);cursor:pointer;background:none;border:none}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;padding:15px 22px;z-index:3000;border:1px solid var(--g400);background:var(--b300);color:var(--g300);font-family:var(--ft);font-size:10px;letter-spacing:2px;transform:translateY(100px);opacity:0;transition:all .4s cubic-bezier(.25,.46,.45,.94)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .container{padding:0 28px}.nav{padding:0 28px}
+  .nlinks{display:none}.nhb{display:flex}
+  .about-grid{grid-template-columns:1fr}.about-vis{height:280px}
+  .vtimeline{grid-template-columns:1fr}
+  .dgrid{grid-template-columns:repeat(2,1fr)}.dcard.feat{grid-column:span 1}
+  .igrid{grid-template-columns:1fr}.cgrid{grid-template-columns:1fr}
+  .finn{grid-template-columns:1fr 1fr}
+  .cform{grid-template-columns:1fr}.fg.full{grid-column:span 1}.fsub{grid-column:span 1}
+}
+@media(max-width:640px){
+  .hstats{display:none}.dgrid{grid-template-columns:1fr}
+  .finn{grid-template-columns:1fr}.hctas{flex-direction:column;align-items:center}
+  .mfeats{grid-template-columns:1fr}.modal-box{padding:28px}
+  .vgoal{padding:28px}.vgyear{font-size:70px}
+}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-ring" id="curR"></div>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="l-logo">AXION</div>
+  <div class="l-bar-wrap"><div class="l-bar" id="lbar"></div></div>
+  <div class="l-pct" id="lpct">0%</div>
+</div>
+
+<canvas id="gc"></canvas>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="#home" class="nlogo" onclick="go('home');return false">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="22,2 42,37 2,37" stroke="url(#g1)" stroke-width="1.5" fill="none"/>
+      <polygon points="22,11 35,35 9,35" fill="url(#g1)" opacity=".12"/>
+      <line x1="22" y1="2" x2="22" y2="37" stroke="url(#g1)" stroke-width=".5" opacity=".5"/>
+      <circle cx="22" cy="22" r="3" fill="url(#g1)"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FFD700"/>
+          <stop offset="50%" stop-color="#D4AF37"/>
+          <stop offset="100%" stop-color="#8B6914"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div><span class="nlt">AXION</span><span class="nls">HOLDING GROUP</span></div>
+  </a>
+  <ul class="nlinks">
+    <li><a href="#about" onclick="go('about');return false">About</a></li>
+    <li><a href="#vision" onclick="go('vision');return false">Vision 2035</a></li>
+    <li><a href="#divisions" onclick="go('divisions');return false">Divisions</a></li>
+    <li><a href="#charts" onclick="go('charts');return false">Markets</a></li>
+    <li><a href="#investor" onclick="go('investor');return false">Investors</a></li>
+    <li><a href="#contact" class="ncta" onclick="go('contact');return false">Partner With Us</a></li>
+  </ul>
+  <div class="nhb" id="nhb" onclick="toggleMnav()"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mnav" id="mnav">
+  <button class="mncls" onclick="toggleMnav()">✕</button>
+  <a href="#home" onclick="go('home');toggleMnav()">Home</a>
+  <a href="#about" onclick="go('about');toggleMnav()">About</a>
+  <a href="#vision" onclick="go('vision');toggleMnav()">Vision 2035</a>
+  <a href="#divisions" onclick="go('divisions');toggleMnav()">Divisions</a>
+  <a href="#investor" onclick="go('investor');toggleMnav()">Investors</a>
+  <a href="#contact" onclick="go('contact');toggleMnav()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section id="home">
+  <div class="hcont">
+    <div class="hbadge fu"><span class="hbdot"></span>GLOBAL MULTI-SECTOR HOLDING PLATFORM</div>
+    <h1 class="htitle fu"><span>AXION</span>Holding<br>Group</h1>
+    <p class="hsub fu">Building the Future of Global Trade,<br>Technology &amp; Infrastructure</p>
+    <p class="hdesc fu">A diversified global platform operating across agriculture, logistics, retail, mobility, robotics, and healthcare — designed to scale across international markets.</p>
+    <div class="hctas fu">
+      <a href="#divisions" class="btn-p" onclick="go('divisions');return false">Explore Divisions</a>
+      <a href="#contact" class="btn-s" onclick="go('contact');return false">Partner With Us</a>
+      <a href="#investor" class="btn-s" onclick="go('investor');return false">Invest in AXION</a>
+    </div>
+  </div>
+  <div class="hstats fi">
+    <div class="hstat"><span class="hstat-n" data-count="8">0</span><span class="hstat-l">Active Divisions</span></div>
+    <div class="hstat"><span class="hstat-n">$14T+</span><span class="hstat-l">Market Opportunity</span></div>
+    <div class="hstat"><span class="hstat-n">2035</span><span class="hstat-l">Vision Target</span></div>
+  </div>
+  <div class="hscroll" onclick="go('about')"><div class="hsl"></div><span>Scroll</span></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-vis"><canvas id="about-canvas"></canvas></div>
+      <div class="about-content">
+        <div class="sec-hdr">
+          <span class="sec-tag">About AXION</span>
+          <h2 class="sec-title">Connecting Capital, Trade &amp; Technology</h2>
+          <div class="sec-line"></div>
+        </div>
+        <p class="atext">AXION Holding Group is a global multi-sector platform connecting supply chains, technology, and capital across key industries.</p>
+        <p class="atext">We operate across high-demand sectors including agriculture, retail, logistics, robotics, mobility, and healthcare — building integrated systems that drive efficiency, scalability, and long-term value creation.</p>
+        <p class="atext">Our mission is to become a leading global operator and investment platform shaping the future of trade and infrastructure.</p>
+        <div class="apillars">
+          <div class="apillar fu"><div class="pnum">01 ——</div><div class="ptitle">Cash Flow Engines</div></div>
+          <div class="apillar fu"><div class="pnum">02 ——</div><div class="ptitle">Scalable Platforms</div></div>
+          <div class="apillar fu"><div class="pnum">03 ——</div><div class="ptitle">Future Technologies</div></div>
+          <div class="apillar fu"><div class="pnum">04 ——</div><div class="ptitle">Global Ecosystem</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- VISION 2035 -->
+<section id="vision">
+  <div class="container">
+    <div class="sec-hdr fu">
+      <span class="sec-tag">Strategic Roadmap</span>
+      <h2 class="sec-title">Vision 2035</h2>
+      <p class="sec-sub">By 2035, AXION aims to become a billion-dollar global platform operating across multiple high-growth industries.</p>
+      <div class="sec-line"></div>
+    </div>
+    <div class="vtimeline">
+      <div class="vphase fu">
+        <div class="vpnum">01</div>
+        <span class="vplabel">Pillar One</span>
+        <div class="vptitle">Cash Flow Engines</div>
+        <p class="vpdesc">Agriculture &amp; Trade — Building reliable revenue through global commodity trading, connecting suppliers across Middle East, Africa, and Asia with premium buyers.</p>
+      </div>
+      <div class="vphase fu">
+        <div class="vpnum">02</div>
+        <span class="vplabel">Pillar Two</span>
+        <div class="vptitle">Scalable Platforms</div>
+        <p class="vpdesc">Logistics, Retail &amp; Equipment — Developing integrated supply chain systems and private-label brands with global distribution capabilities and premium infrastructure.</p>
+      </div>
+      <div class="vphase fu">
+        <div class="vpnum">03</div>
+        <span class="vplabel">Pillar Three</span>
+        <div class="vptitle">Future Technologies</div>
+        <p class="vpdesc">Robotics, Mobility &amp; AI — Deploying automation and next-generation transportation systems to lead the next industrial revolution across global markets.</p>
+      </div>
+    </div>
+    <div class="vgoal fu">
+      <span class="vgyear">2035</span>
+      <div class="vgtitle">We Are Building an Ecosystem</div>
+      <p class="vgdesc">Not a single company — a billion-dollar global platform. AXION integrates trade, logistics, technology, and capital into one unified force shaping the future of global commerce.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DIVISIONS -->
+<section id="divisions">
+  <div class="container">
+    <div class="sec-hdr fu">
+      <span class="sec-tag">Our Portfolio</span>
+      <h2 class="sec-title">AXION Divisions</h2>
+      <p class="sec-sub">Eight specialized divisions, each generating revenue while contributing to a unified global ecosystem.</p>
+      <div class="sec-line"></div>
+    </div>
+    <div class="dgrid" id="dgrid"></div>
+  </div>
+</section>
+
+<!-- DIVISION MODAL -->
+<div class="modal-ov" id="dmod">
+  <div class="modal-box">
+    <button class="mcls" onclick="closeModal()">✕</button>
+    <canvas id="mc"></canvas>
+    <div class="mtag" id="mtag"></div>
+    <div class="mtitle" id="mtitle"></div>
+    <div class="mbody" id="mbody"></div>
+    <div class="mfeats" id="mfeats"></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- CHARTS -->
+<section id="charts">
+  <div class="container">
+    <div class="sec-hdr fu">
+      <span class="sec-tag">Market Intelligence</span>
+      <h2 class="sec-title">Global Market Scale</h2>
+      <p class="sec-sub">AXION operates across some of the world's largest and fastest-growing market sectors.</p>
+      <div class="sec-line"></div>
+    </div>
+    <div class="cgrid">
+      <div class="ccard fu"><div class="ctitle">Market Opportunity ($T)</div><div class="cwrap"><canvas id="ch1"></canvas></div></div>
+      <div class="ccard fu"><div class="ctitle">AXION Revenue Projection</div><div class="cwrap"><canvas id="ch2"></canvas></div></div>
+      <div class="ccard fu"><div class="ctitle">Division Revenue Mix</div><div class="cwrap"><canvas id="ch3"></canvas></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INVESTOR -->
+<section id="investor">
+  <div class="container">
+    <div class="sec-hdr fu">
+      <span class="sec-tag">Investment Opportunity</span>
+      <h2 class="sec-title">Invest in AXION</h2>
+      <p class="sec-sub">Positioned at the intersection of global trade, infrastructure, and technology.</p>
+      <div class="sec-line"></div>
+    </div>
+    <div class="igrid">
+      <div class="fu">
+        <div class="imkts">
+          <div class="mkt"><span class="mktv">$3T+</span><span class="mktl">Agriculture</span></div>
+          <div class="mkt"><span class="mktv">$10T+</span><span class="mktl">Logistics</span></div>
+          <div class="mkt"><span class="mktv">$100B+</span><span class="mktl">Robotics</span></div>
+          <div class="mkt"><span class="mktv">$1T</span><span class="mktl">Mobility (Future)</span></div>
+        </div>
+        <p class="itext">AXION offers investors exposure to multiple high-growth sectors through a single integrated platform — combining the stability of commodity trading with the upside of frontier technology.</p>
+        <p class="itext">Our diversified model means multiple revenue streams, reduced risk, and exponential upside as sectors converge and compound each other's growth.</p>
+        <div class="ictas">
+          <a href="#contact" class="btn-p" onclick="reqDeck();return false">Request Investor Deck</a>
+          <a href="#contact" class="btn-s" onclick="go('contact');return false">Schedule a Call</a>
+        </div>
+      </div>
+      <div class="fu">
+        <div class="pdeck">
+          <div class="pdhdr"><span class="pdtitle">INVESTOR PITCH DECK</span><span class="sctr"><span id="cslide">1</span> / <span id="tslides">10</span></span></div>
+          <div class="pslides" id="pslides"></div>
+          <div class="snav">
+            <button class="sbtn" onclick="prevSlide()">◀ PREV</button>
+            <div class="sdots" id="sdots"></div>
+            <button class="sbtn" onclick="nextSlide()">NEXT ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="cinn fu">
+      <h2 class="ct">Partner With AXION</h2>
+      <p class="csub">Whether you're an investor, supplier, partner, or prospective client — we want to hear from you.</p>
+      <form class="cform" id="cform" onsubmit="submitForm(event)">
+        <div class="fg"><label class="flabel">Full Name</label><input type="text" class="finput" placeholder="Your full name" required></div>
+        <div class="fg"><label class="flabel">Email Address</label><input type="email" class="finput" placeholder="your@email.com" required></div>
+        <div class="fg"><label class="flabel">Company</label><input type="text" class="finput" placeholder="Company name"></div>
+        <div class="fg"><label class="flabel">Inquiry Type</label>
+          <select class="fsel finput">
+            <option value="">Select inquiry type</option>
+            <option>Investment Opportunity</option>
+            <option>Partnership</option>
+            <option>Supply Chain</option>
+            <option>Logistics</option>
+            <option>Robotics &amp; AI</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="fg full"><label class="flabel">Message</label><textarea class="fta" placeholder="Tell us about your interest in AXION..." required></textarea></div>
+        <div class="fg full fsub"><button type="submit" class="bsub">SUBMIT INQUIRY →</button></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="finn">
+      <div>
+        <div class="nlogo" style="display:inline-flex;margin-bottom:0">
+          <svg width="36" height="36" viewBox="0 0 44 44" fill="none"><polygon points="22,2 42,37 2,37" stroke="url(#g2)" stroke-width="1.5" fill="none"/><circle cx="22" cy="22" r="3" fill="url(#g2)"/><defs><linearGradient id="g2" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#8B6914"/></linearGradient></defs></svg>
+          <div style="margin-left:12px"><span class="nlt">AXION</span><span class="nls">HOLDING GROUP</span></div>
+        </div>
+        <p class="fdesc">A global multi-sector platform building the future of trade, technology, and infrastructure across international markets.</p>
+      </div>
+      <div>
+        <div class="fct">Company</div>
+        <ul class="flinks">
+          <li><a href="#about" onclick="go('about');return false">About AXION</a></li>
+          <li><a href="#vision" onclick="go('vision');return false">Vision 2035</a></li>
+          <li><a href="#divisions" onclick="go('divisions');return false">Our Divisions</a></li>
+          <li><a href="#investor" onclick="go('investor');return false">Investors</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fct">Divisions</div>
+        <ul class="flinks">
+          <li><a href="#divisions" onclick="go('divisions');return false">Agriculture</a></li>
+          <li><a href="#divisions" onclick="go('divisions');return false">Logistics</a></li>
+          <li><a href="#divisions" onclick="go('divisions');return false">Robotics &amp; AI</a></li>
+          <li><a href="#divisions" onclick="go('divisions');return false">Mobility</a></li>
+          <li><a href="#divisions" onclick="go('divisions');return false">Medicine &amp; Pharma</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fct">Contact</div>
+        <ul class="flinks">
+          <li><a href="#contact" onclick="go('contact');return false">Partner With Us</a></li>
+          <li><a href="#investor" onclick="go('investor');return false">Investment Deck</a></li>
+          <li><a href="#contact" onclick="go('contact');return false">Schedule a Call</a></li>
+          <li><a href="#contact" onclick="go('contact');return false">Media &amp; Press</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="fbot">
+      <span class="fcopy">© 2025 AXION Holding Group. All rights reserved.</span>
+      <div class="flegal"><a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Legal</a></div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+/* ===== DATA ===== */
+const DIV = [
+  {id:'agri',n:'01',name:'AXION Agriculture',tag:'Global Commodity Trading',desc:'Corn, wheat, soybeans, and feed products — connecting suppliers with buyers across the Middle East, Africa, and Asia.',color:'#4CAF50',feat:true,body:'AXION Agriculture focuses on global commodity trading, specializing in corn, wheat, soybeans, and feed products. We connect international suppliers with buyers across the Middle East, Africa, and Asia, ensuring reliable, scalable, and compliant trade operations.',feats:['Global Commodity Trading','MENA Supply Networks','Logistics Integration','Compliance Management','Corn & Wheat Specialization','Long-term Buyer Contracts']},
+  {id:'mkt',n:'02',name:'AXION Market',tag:'Retail & Private Label',desc:'Fashion, fragrances, and lifestyle products. Culturally inspired brands with global appeal.',color:'#E91E63',feat:false,body:'AXION Market is a fast-growing retail and private-label platform offering fashion, fragrances, and lifestyle products. We develop culturally inspired brands with global appeal, combining design, manufacturing, and distribution.',feats:['Private Label Brands','Fashion & Lifestyle','Global Distribution','Cultural Brand Design','Manufacturing Partners','Fragrance Lines']},
+  {id:'log',n:'03',name:'AXION Logistics',tag:'Global Freight & Distribution',desc:'Integrated shipping, freight brokerage, and distribution streamlining global supply chains.',color:'#2196F3',feat:false,body:'AXION Logistics provides integrated global shipping, freight brokerage, and distribution services. We streamline supply chains through strategic coordination and scalable infrastructure.',feats:['Ocean Freight','Air Cargo Brokerage','Last-Mile Distribution','Supply Chain Optimization','Customs Compliance','Real-Time Tracking']},
+  {id:'rob',n:'04',name:'AXION Robotics & AI',tag:'Automation as a Service',desc:'Robotics-as-a-Service (RaaS) enabling businesses to increase efficiency and reduce costs.',color:'#9C27B0',feat:false,body:'AXION Robotics & AI delivers automation solutions through Robotics-as-a-Service (RaaS), enabling businesses to increase efficiency and reduce operational costs through cutting-edge automation.',feats:['RaaS Business Model','Industrial Automation','AI-Driven Analytics','Warehouse Robotics','Predictive Maintenance','Custom Integration']},
+  {id:'dev',n:'05',name:'AXION Development',tag:'Modern Construction Solutions',desc:'Luxury prefabricated homes and modular infrastructure for next-generation living.',color:'#FF9800',feat:false,body:'AXION Development focuses on modern construction solutions, including luxury prefabricated homes and modular infrastructure for residential and commercial markets.',feats:['Prefab Luxury Homes','Modular Infrastructure','Smart Building Tech','Sustainable Materials','Rapid Deployment','Custom Design']},
+  {id:'eq',n:'06',name:'AXION Equipment',tag:'Heavy Machinery & Leasing',desc:'Supply and leasing of heavy machinery and agricultural equipment for industrial growth.',color:'#795548',feat:false,body:'AXION Equipment supplies and leases heavy machinery and agricultural equipment to support infrastructure and industrial growth across our target markets.',feats:['Equipment Leasing','Agricultural Machinery','Heavy Construction','Fleet Management','Maintenance Services','Global Sourcing']},
+  {id:'mob',n:'07',name:'AXION Mobility',tag:'Next-Gen Transportation',desc:'Electric fleets and urban air mobility platforms defining the future of transportation.',color:'#00BCD4',feat:false,body:'AXION Mobility is developing next-generation transportation systems, including electric fleets and urban air mobility platforms that will redefine how people and goods move.',feats:['Electric Vehicle Fleets','Urban Air Mobility','Fleet-as-a-Service','Smart City Integration','Carbon-Zero Transport','Autonomous Systems']},
+  {id:'med',n:'08',name:'AXION Medicine & Pharma',tag:'Global Healthcare Supply',desc:'Medical equipment distribution, pharmaceutical supply chains, and private-label healthcare.',color:'#F44336',feat:false,body:'AXION Medicine & Pharmaceutical focuses on global healthcare supply chains, including medical equipment, pharmaceutical distribution, and private-label healthcare products.',feats:['Medical Equipment','Pharma Distribution','Private-Label Health','Regulatory Compliance','Cold Chain Logistics','Healthcare Innovation']}
+];
+
+const SLIDES = [
+  {tag:'SLIDE 01 — INTRODUCTION',title:'AXION Holding Group',html:'<p class="scont">Global Trade &amp; Technology Platform. A diversified holding group operating across 8 high-growth sectors, positioned to become a billion-dollar global operator by 2035.</p>'},
+  {tag:'SLIDE 02 — THE PROBLEM',title:'A Fragmented World',html:'<ul class="sitems"><li>Fragmented global supply chains driving up costs</li><li>Inefficient logistics creating delays and waste</li><li>Lack of integrated cross-sector platforms</li><li>Capital disconnected from operational infrastructure</li></ul>'},
+  {tag:'SLIDE 03 — OUR SOLUTION',title:'AXION Integrates Everything',html:'<ul class="sitems"><li>Trade — commodity sourcing and export networks</li><li>Logistics — freight brokerage and distribution</li><li>Technology — robotics, AI, and automation</li><li>Capital — investor-grade diversified holding structure</li></ul>'},
+  {tag:'SLIDE 04 — BUSINESS MODEL',title:'Multiple Revenue Streams',html:'<ul class="sitems"><li>Commodity Trading margins</li><li>Retail &amp; Private Label brand revenue</li><li>Logistics brokerage fees</li><li>Robotics subscription (RaaS model)</li><li>Mobility platform licensing</li></ul>'},
+  {tag:'SLIDE 05 — MARKET SIZE',title:'$14+ Trillion Opportunity',html:'<ul class="sitems"><li>Agriculture: $3T+ global market</li><li>Logistics: $10T+ addressable market</li><li>Robotics &amp; AI: $100B+ and growing rapidly</li><li>Urban Mobility: $1T projected future market</li></ul>'},
+  {tag:'SLIDE 06 — TRACTION',title:'Building Momentum',html:'<ul class="sitems"><li>Active commodity trade deals in progress</li><li>Supplier network spanning 3 continents</li><li>Expansion pipeline across MENA and Asia</li><li>Strategic partnerships under negotiation</li></ul>'},
+  {tag:'SLIDE 07 — GROWTH STRATEGY',title:'Four-Phase Expansion',html:'<ul class="sitems"><li><strong>Phase 1:</strong> Trade — Agriculture &amp; Commodity Foundation</li><li><strong>Phase 2:</strong> Logistics — Global Supply Chain Integration</li><li><strong>Phase 3:</strong> Technology — Robotics &amp; AI Deployment</li><li><strong>Phase 4:</strong> Mobility — Next-Gen Transportation Rollout</li></ul>'},
+  {tag:'SLIDE 08 — COMPETITIVE EDGE',title:'Why AXION Wins',html:'<ul class="sitems"><li>Multi-sector integration creating compounding synergies</li><li>Global network spanning MENA, Asia, and Europe</li><li>Scalable holding structure adaptable to market changes</li><li>Founder-led with hands-on operational expertise</li></ul>'},
+  {tag:'SLIDE 09 — FINANCIALS',title:'Exponential Trajectory',html:'<ul class="sitems"><li>Year 1–3: Establish cash flow through commodity trade</li><li>Year 3–5: Scale logistics and retail platforms</li><li>Year 5–10: Exponential growth through technology layer</li><li>Target: $1B+ platform valuation by 2035</li></ul>'},
+  {tag:'SLIDE 10 — FUNDING ASK',title:'Join the AXION Journey',html:'<ul class="sitems"><li>Raise: $2M – $5M initial funding round</li><li>Inventory &amp; working capital: 40%</li><li>Geographic expansion: 25%</li><li>Team &amp; operations: 20%</li><li>Technology infrastructure: 15%</li></ul>'}
+];
+
+/* ===== LOADING ===== */
+let lp=0;
+function runLoader(){
+  const bar=document.getElementById('lbar'),pct=document.getElementById('lpct'),el=document.getElementById('loading');
+  const iv=setInterval(()=>{
+    lp+=Math.random()*13+4;
+    if(lp>=100){lp=100;clearInterval(iv);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .8s';setTimeout(()=>{el.style.display='none';boot();},800);},200);}
+    bar.style.width=lp+'%';pct.textContent=Math.round(lp)+'%';
+  },70);
+}
+runLoader();
+
+/* ===== THREE.JS GLOBAL PARTICLES ===== */
+function initBG(){
+  const canvas=document.getElementById('gc');
+  const R=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  R.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  R.setSize(innerWidth,innerHeight);
+  const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
+  C.position.z=80;
+
+  // Particles
+  const N=1400,pos=new Float32Array(N*3),col=new Float32Array(N*3),sz=new Float32Array(N);
+  const gc=[[1,.84,.21],[.83,.68,.21],[.72,.53,.04],[1,.95,.82],[.55,.42,.08]];
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-.5)*220;pos[i*3+1]=(Math.random()-.5)*220;pos[i*3+2]=(Math.random()-.5)*110;
+    const c=gc[Math.floor(Math.random()*gc.length)];
+    col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2];
+    sz[i]=Math.random()*1.8+.4;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:.7,vertexColors:true,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,sizeAttenuation:true}));
+  S.add(pts);
+
+  // Rings
+  const addRing=(r,op,rx=0,ry=0)=>{const m=new THREE.Mesh(new THREE.TorusGeometry(r,.12,8,120),new THREE.MeshBasicMaterial({color:0xD4AF37,transparent:true,opacity:op}));m.rotation.x=rx;m.rotation.y=ry;S.add(m);return m;};
+  const r1=addRing(28,.07),r2=addRing(46,.045,Math.PI/3),r3=addRing(64,.025,Math.PI/1.7,Math.PI/4);
+
+  let mx=0,my=0,sy=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*.25;my=(e.clientY/innerHeight-.5)*.2;});
+  window.addEventListener('scroll',()=>{sy=scrollY;});
+
+  (function anim(){requestAnimationFrame(anim);const t=Date.now()*.0002;
+    pts.rotation.y=t*.04+mx*.4;pts.rotation.x=t*.015+my*.25;
+    r1.rotation.z=t*.08;r2.rotation.z=t*.05;r3.rotation.z=-t*.035;
+    C.position.y=-sy*.008;R.render(S,C);
+  })();
+  window.addEventListener('resize',()=>{C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);});
+}
+
+/* ===== ABOUT 3D ===== */
+function initAbout(){
+  const cv=document.getElementById('about-canvas');
+  if(!cv)return;
+  const W=cv.parentElement.offsetWidth,H=cv.parentElement.offsetHeight||480;
+  const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  R.setSize(W,H);R.setPixelRatio(Math.min(devicePixelRatio,2));
+  const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(45,W/H,.1,100);
+  C.position.z=6.5;
+  const geo=new THREE.IcosahedronGeometry(1.7,1);
+  const ico=new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:0x0A0A0A,emissive:0x1a1100,shininess:120}));
+  const wire=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xD4AF37,wireframe:true,transparent:true,opacity:.35}));
+  S.add(ico);S.add(wire);
+  const mkRing=(r,op,rx=0)=>{const m=new THREE.Mesh(new THREE.TorusGeometry(r,.025,8,100),new THREE.MeshBasicMaterial({color:0xD4AF37,transparent:true,opacity:op}));m.rotation.x=rx;S.add(m);return m;};
+  const ra=mkRing(2.3,.6),rb=mkRing(3,.4,Math.PI/3),rc=mkRing(3.7,.2,Math.PI/1.5);
+  S.add(new THREE.PointLight(0xD4AF37,2.5,20));S.add(new THREE.AmbientLight(0x221100,.6));
+  (function anim(){requestAnimationFrame(anim);const t=Date.now()*.001;
+    ico.rotation.y=t*.25;ico.rotation.x=t*.08;wire.rotation.y=t*.25;wire.rotation.x=t*.08;
+    ra.rotation.z=t*.35;rb.rotation.z=t*.2;rc.rotation.z=-t*.12;R.render(S,C);
+  })();
+}
+
+/* ===== DIVISION ICON 3D ===== */
+const geoMap={agri:'tet',mkt:'box',log:'con',rob:'oct',dev:'box2',eq:'tor',mob:'sph',med:'ico'};
+function mkIconRenderer(cv,div){
+  const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  R.setSize(60,60);R.setPixelRatio(1);
+  const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(50,1,.1,50);C.position.z=3;
+  let geo;
+  switch(geoMap[div.id]){
+    case'tet':geo=new THREE.TetrahedronGeometry(.85,0);break;
+    case'box':geo=new THREE.BoxGeometry(1.1,1.1,1.1);break;
+    case'con':geo=new THREE.CylinderGeometry(0,.85,1.5,6);break;
+    case'oct':geo=new THREE.OctahedronGeometry(.9,0);break;
+    case'box2':geo=new THREE.BoxGeometry(.8,1.3,.8);break;
+    case'tor':geo=new THREE.TorusGeometry(.65,.24,8,18);break;
+    case'sph':geo=new THREE.SphereGeometry(.8,14,14);break;
+    default:geo=new THREE.IcosahedronGeometry(.85,1);
+  }
+  S.add(new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:0x080808,emissive:new THREE.Color(div.color).multiplyScalar(.18),shininess:90})));
+  S.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xD4AF37,wireframe:true,transparent:true,opacity:.65})));
+  S.add(new THREE.PointLight(0xD4AF37,2.2,12));S.add(new THREE.AmbientLight(0x111100,1));
+  (function a(){requestAnimationFrame(a);S.children[0].rotation.y+=.018;S.children[0].rotation.x+=.006;S.children[1].rotation.y+=.018;S.children[1].rotation.x+=.006;R.render(S,C);})();
+}
+
+/* ===== BUILD DIVISIONS ===== */
+function buildDivs(){
+  const grid=document.getElementById('dgrid');
+  grid.innerHTML=DIV.map((d,i)=>`
+    <div class="dcard${d.feat?' feat':''}" onclick="openMod(${i})">
+      <span class="dnum">${d.n}</span>
+      <div class="diwrap"><canvas class="dic" id="dc-${d.id}" width="60" height="60"></canvas></div>
+      <div class="dname">${d.name}</div>
+      <div class="dtag">${d.tag}</div>
+      <p class="ddesc">${d.desc}</p>
+      <div class="darrow"><span>EXPLORE DIVISION</span><span>→</span></div>
+    </div>`).join('');
+  DIV.forEach(d=>{const cv=document.getElementById('dc-'+d.id);if(cv)mkIconRenderer(cv,d);});
+}
+
+/* ===== MODAL ===== */
+let mR=null;
+function openMod(i){
+  const d=DIV[i];
+  document.getElementById('mtag').textContent=`Division ${d.n} — ${d.tag}`;
+  document.getElementById('mtitle').textContent=d.name;
+  document.getElementById('mbody').textContent=d.body;
+  document.getElementById('mfeats').innerHTML=d.feats.map(f=>`<div class="mfeat">${f}</div>`).join('');
+  const mo=document.getElementById('dmod');mo.classList.add('active');document.body.style.overflow='hidden';
+  const cv=document.getElementById('mc');
+  if(mR){mR.dispose();mR=null;}
+  const W=cv.offsetWidth||800;
+  mR=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  mR.setSize(W,240);mR.setPixelRatio(Math.min(devicePixelRatio,2));
+  const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(45,W/240,.1,100);C.position.z=7;
+  const N=500,pp=new Float32Array(N*3);
+  for(let k=0;k<N;k++){pp[k*3]=(Math.random()-.5)*22;pp[k*3+1]=(Math.random()-.5)*9;pp[k*3+2]=(Math.random()-.5)*12;}
+  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+  S.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0xD4AF37,size:.06,transparent:true,opacity:.55})));
+  let mg;
+  switch(geoMap[d.id]){
+    case'tet':mg=new THREE.TetrahedronGeometry(1.6,0);break;
+    case'box':mg=new THREE.BoxGeometry(2,2,2);break;
+    case'con':mg=new THREE.CylinderGeometry(0,1.6,3,6);break;
+    case'oct':mg=new THREE.OctahedronGeometry(1.8,0);break;
+    case'box2':mg=new THREE.BoxGeometry(1.5,2.4,1.5);break;
+    case'tor':mg=new THREE.TorusGeometry(1.3,.44,8,32);break;
+    case'sph':mg=new THREE.SphereGeometry(1.5,28,28);break;
+    default:mg=new THREE.IcosahedronGeometry(1.6,1);
+  }
+  S.add(new THREE.Mesh(mg,new THREE.MeshPhongMaterial({color:0x080808,emissive:new THREE.Color(d.color).multiplyScalar(.14),shininess:100})));
+  S.add(new THREE.Mesh(mg,new THREE.MeshBasicMaterial({color:0xD4AF37,wireframe:true,transparent:true,opacity:.55})));
+  S.add(new THREE.PointLight(0xD4AF37,3.5,25));S.add(new THREE.AmbientLight(0x111100,1));
+  (function am(){requestAnimationFrame(am);S.children[1].rotation.y+=.007;S.children[1].rotation.x+=.003;S.children[2].rotation.y+=.007;S.children[2].rotation.x+=.003;mR&&mR.render(S,C);})();
+}
+function closeModal(){document.getElementById('dmod').classList.remove('active');document.body.style.overflow='';if(mR){mR.dispose();mR=null;}}
+document.getElementById('dmod').addEventListener('click',e=>{if(e.target===document.getElementById('dmod'))closeModal();});
+
+/* ===== PITCH DECK ===== */
+let cs=0;
+function buildDeck(){
+  const ps=document.getElementById('pslides'),dots=document.getElementById('sdots');
+  document.getElementById('tslides').textContent=SLIDES.length;
+  ps.innerHTML=SLIDES.map((s,i)=>`<div class="pslide${i===0?' active':''}" id="ps-${i}"><div class="snum">${String(i+1).padStart(2,'0')}</div><div class="stag">${s.tag}</div><div class="stitle">${s.title}</div>${s.html}</div>`).join('');
+  dots.innerHTML=SLIDES.map((_,i)=>`<div class="sdot${i===0?' active':''}" onclick="goSlide(${i})"></div>`).join('');
+}
+function goSlide(i){
+  document.querySelectorAll('.pslide').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sdot').forEach(d=>d.classList.remove('active'));
+  document.getElementById('ps-'+i).classList.add('active');
+  document.querySelectorAll('.sdot')[i].classList.add('active');
+  document.getElementById('cslide').textContent=i+1;cs=i;
+}
+function nextSlide(){goSlide((cs+1)%SLIDES.length);}
+function prevSlide(){goSlide((cs-1+SLIDES.length)%SLIDES.length);}
+
+/* ===== CHARTS ===== */
+function initCharts(){
+  const gp=['rgba(212,175,55,.9)','rgba(255,215,0,.75)','rgba(184,134,11,.8)','rgba(255,236,153,.7)','rgba(107,79,10,.85)','rgba(212,175,55,.5)','rgba(255,215,0,.4)','rgba(184,134,11,.55)'];
+  const tickCfg={color:'rgba(255,255,255,.45)',font:{family:'Rajdhani',size:10}};
+  const gridCfg={color:'rgba(212,175,55,.07)'};
+  const legCfg={labels:{color:'rgba(255,255,255,.55)',font:{family:'Rajdhani',size:11},boxWidth:12}};
+
+  new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:['Agriculture','Logistics','Robotics','Mobility','Healthcare','Retail'],datasets:[{label:'Size ($T)',data:[3,10,.1,1,.5,.3],backgroundColor:gp,borderColor:'rgba(212,175,55,.5)',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:legCfg.labels}},scales:{x:{grid:gridCfg,ticks:tickCfg},y:{grid:gridCfg,ticks:tickCfg}}}});
+
+  new Chart(document.getElementById('ch2'),{type:'line',data:{labels:['2025','2026','2027','2028','2029','2030','2032','2035'],datasets:[{label:'Revenue ($M)',data:[.5,2,8,20,45,90,250,1000],borderColor:'rgba(212,175,55,.9)',backgroundColor:'rgba(212,175,55,.07)',fill:true,tension:.4,pointBackgroundColor:'rgba(212,175,55,.9)',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:legCfg.labels}},scales:{x:{grid:gridCfg,ticks:tickCfg},y:{type:'logarithmic',grid:gridCfg,ticks:tickCfg}}}});
+
+  new Chart(document.getElementById('ch3'),{type:'doughnut',data:{labels:['Agriculture','Logistics','Retail','Robotics','Equipment','Other'],datasets:[{data:[35,25,20,10,6,4],backgroundColor:gp,borderColor:'rgba(10,10,10,.8)',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{labels:legCfg.labels}}}});
+}
+
+/* ===== GSAP ANIMATIONS ===== */
+function initGSAP(){
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.utils.toArray('.fu').forEach(el=>{
+    gsap.fromTo(el,{opacity:0,y:48},{opacity:1,y:0,duration:.85,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 90%',toggleActions:'play none none none'}});
+  });
+  gsap.utils.toArray('.fi').forEach(el=>{
+    gsap.fromTo(el,{opacity:0},{opacity:1,duration:1.1,scrollTrigger:{trigger:el,start:'top 88%'}});
+  });
+  gsap.fromTo('.dcard',{opacity:0,y:55,scale:.96},{opacity:1,y:0,scale:1,duration:.65,stagger:.07,ease:'power3.out',scrollTrigger:{trigger:'#dgrid',start:'top 82%'}});
+}
+
+/* ===== CURSOR ===== */
+function initCursor(){
+  const cur=document.getElementById('cur'),ring=document.getElementById('curR');
+  document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';setTimeout(()=>{ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';},80);});
+  document.querySelectorAll('a,button,.dcard,.sbtn,.sdot,.mcls').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cur.classList.add('h');ring.classList.add('h');});
+    el.addEventListener('mouseleave',()=>{cur.classList.remove('h');ring.classList.remove('h');});
+  });
+}
+
+/* ===== HERO ENTRANCE ===== */
+function heroAnim(){
+  const seq=['.hbadge','.htitle','.hsub','.hdesc','.hctas','.hstats','.hscroll'];
+  seq.forEach((s,i)=>{
+    const el=document.querySelector(s);
+    if(el)gsap.fromTo(el,{opacity:0,y:s==='.hstats'?0:30,x:s==='.hstats'?20:0},{opacity:1,y:0,x:0,duration:.8,delay:.2+i*.18,ease:'power3.out'});
+  });
+}
+
+/* ===== NAV ===== */
+function initNav(){window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('sc',scrollY>50);});}
+
+/* ===== HELPERS ===== */
+function go(id){const el=document.getElementById(id);if(el){const y=el.getBoundingClientRect().top+scrollY-78;window.scrollTo({top:y,behavior:'smooth'});}}
+function toggleMnav(){document.getElementById('mnav').classList.toggle('open');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
+function submitForm(e){e.preventDefault();toast('✓ Inquiry submitted. We will be in touch shortly.');e.target.reset();}
+function reqDeck(){toast('📄 Investor deck request noted. Redirecting...');setTimeout(()=>go('contact'),900);}
+
+/* ===== COUNTER ===== */
+function initCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    let c=0;const t=parseInt(el.dataset.count);const iv=setInterval(()=>{c+=t/50;if(c>=t){c=t;clearInterval(iv);}el.textContent=Math.round(c);},25);
+  });
+}
+
+/* ===== BOOT ===== */
+function boot(){
+  initBG();initAbout();buildDivs();buildDeck();initGSAP();initCursor();initNav();initCounters();initCharts();heroAnim();
+}
+</script>
+</body>
+</html>
